@@ -16,6 +16,17 @@ export default class HomeComponent {
 
     try {
       const pgnText = await this.readPgnService.loadPgnFile();
+
+
+      const partidas: any[] = [];
+      const juegos = pgnText.split(/\n\n(?=\[Event)/); // Divide las partidas en bloques
+    
+      juegos.forEach((juego) => {
+        partidas.push(juego);
+      });
+    
+      // console.log(partidas);
+
     } catch (error) {
       console.error('Error al cargar el PGN:', error);
     }
