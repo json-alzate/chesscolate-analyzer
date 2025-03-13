@@ -2,6 +2,10 @@ import { Component } from '@angular/core';
 
 import { ReadPgnService } from '../../services/read-pgn.service';
 
+interface ColumnData {
+  [column: string]: number;
+}
+
 @Component({
   selector: 'app-home',
   imports: [],
@@ -24,7 +28,7 @@ export default class HomeComponent {
         partidas.push(juego);
       });
 
-      console.log(partidas[0]);
+      console.log(this.extractPawnMoves(partidas[0], true));
 
     } catch (error) {
       console.error('Error al cargar el PGN:', error);
@@ -40,6 +44,40 @@ export default class HomeComponent {
 
     }
 
+  }
+
+
+  extractPawnMoves(pgnText: string, evaluateWhite: boolean): ColumnData {
+
+    const whiteMovePattern = /\d+\.\s*([a-h](?:x?[a-h]?[1-8]))/g;
+    const blackMovePattern = /\d+\.\.\.\s*([a-h](?:x?[a-h]?[1-8]))/g;
+
+    const pawnMovePattern = /\d+\.\.\.\s*([a-h](?:x?[a-h]?[1-8]))/g;
+    const moves = pgnText.match(pawnMovePattern) || [];
+    console.log(pgnText);
+
+    console.log(moves);
+
+    const columnCounts: ColumnData = {};
+
+    for (let col of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']) {
+      columnCounts[col] = 0;
+    }
+
+    const isWhiteTurn = (moveNumber: number) => moveNumber % 2 !== 0;
+
+    let moveNumber = 1;
+    for (let move of moves) {
+      let column = move[0];
+      if (columnCounts[column]) {
+        if ((evaluateWhite && isWhiteTurn(moveNumber)) || (!evaluateWhite && !isWhiteTurn(moveNumber))) {
+          columnCounts[column] += 1;
+        }
+      }
+      moveNumber++;
+    }
+
+    return columnCounts;
   }
 
 
